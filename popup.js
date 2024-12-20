@@ -177,6 +177,7 @@ async function downloadLineup() {
     const links = rows.map(row => row.children[1].children[0].dataset.id); 
     let lineup = "";
     lineupBtn.textContent = `0/${links.length}`
+    lineupBtn.disabled = "true";
 
     let done = 0
     for (let link of links) {
@@ -194,11 +195,11 @@ async function downloadLineup() {
                 let content = contentElement.innerHTML.trim();
 
                 
-                content = content.replace(/<\/p>/g, '\n'); 
-                content = content.replace(/<p>/g, '');     
-                content = content.replace(/<br>/g, '');    
+                content = content.replace(/<\/p>/g, '\n');  
+                content = content.replace(/<p>/g, ''); 
+                content = content.replace(/<br>/g, '');   
 
-                lineup += `${title}\n${content}\n<----->\n`;
+                lineup += `${title}\n\n${content}\n<----->\n`;
                 lineupBtn.textContent = `${++done}/${links.length}`;
             } else {
                 console.warn(`Failed to extract lyrics for ${link}`);
@@ -225,6 +226,7 @@ async function downloadLineup() {
 
 
     lineupBtn.textContent = `Download Lineup`;
+    lineupBtn.disabled = "false";
 }
 
 
