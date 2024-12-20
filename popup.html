@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lyrics Copier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+    .button-container {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+    button {
+      margin-right: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .manual-textbox-container {
+      margin-bottom: 20px;
+      display: none;
+      justify-content: center;
+    }
+    .csv-button-container {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .csv-btn {
+      padding: 5px 15px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+    .csv-btn:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .copy-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background-color: #0056b3;
+    }
+    #loading-label {
+      display: block;
+      font-weight: bold;
+      color: #ff4500;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <button id="tg-btn" disabled>TG</button>
+    <button id="ws-btn" disabled>WS</button>
+    <button id="pm-btn" disabled>PM</button>
+    <button id="manual-btn"><i class="fa fa-pencil"></i></button>
+  </div>
+  
+  <div class="manual-textbox-container" visible>
+    <input type="text" id="manual-entry" placeholder="Enter lyrics link">
+    <button id="search-btn"><i class="fa fa-search"></i></button>
+  </div>
+
+  <div class="csv-button-container">
+    <button id="download-csv-btn" class="csv-btn">Download CSV</button>
+    <button id="download-export-btn" class="csv-btn">Export Lineup</button>
+  </div>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Links</th>
+      </tr>
+    </thead>
+    <tbody id="titles-table-body"></tbody>
+  </table>
+
+  <!-- Loading label -->
+  <div id="loading-label">Loading...</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
