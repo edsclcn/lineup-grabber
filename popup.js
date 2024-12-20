@@ -49,6 +49,7 @@ function setupButtons() {
     });
 
     function manualSearch() {
+        document.getElementById("loading-label").style.display = "block";
         const manualLink = document.getElementById('manual-entry').value;
         openAndLoadTable(manualLink);
         setDownloadFilename("Search");
@@ -115,18 +116,18 @@ function openAndLoadTable(url) {
             const tableBody = document.getElementById("titles-table-body");
             tableBody.innerHTML = "";
 
-            rows.forEach((row) => {
+            rows.slice(1).forEach((row) => {
                 const title = row.children[2].textContent.trim();
                 const pageButton = row.children[4].querySelector("a");
 
-                if (title && pageButton) {
+                const tr = document.createElement("tr");
+
+                const tdTitle = document.createElement("td");
+                tdTitle.textContent = title;
+
+                // If there's a page button (anchor), create the button; otherwise, display "Not Available"
+                if (pageButton && pageButton.href) {
                     const pageLink = pageButton.href;
-                    const tr = document.createElement("tr");
-
-                    const tdTitle = document.createElement("td");
-                    tdTitle.textContent = title;
-                    tr.appendChild(tdTitle);
-
                     const tdButton = document.createElement("td");
                     const copyBtn = document.createElement("button");
                     copyBtn.textContent = "Copy Lyrics";
@@ -135,9 +136,16 @@ function openAndLoadTable(url) {
                     copyBtn.dataset.id = pageLink;
 
                     tdButton.appendChild(copyBtn);
+                    tr.appendChild(tdTitle);
                     tr.appendChild(tdButton);
-                    tableBody.appendChild(tr);
+                } else {
+                    const tdButton = document.createElement("td");
+                    tdButton.textContent = "Not Available"; // Text instead of button
+                    tr.appendChild(tdTitle);
+                    tr.appendChild(tdButton);
                 }
+
+                tableBody.appendChild(tr);
             });
 
             document.getElementById("loading-label").style.display = "none";
@@ -171,42 +179,111 @@ function downloadCSV() {
     }
 }
 
+// async function downloadLineup() {
+//     const lineupBtn = document.getElementById("download-lineup-btn");
+//     const rows = [...document.querySelectorAll("#titles-table-body tr")];
+//     const links = rows.map(row => row.children[1].children[0].dataset.id); 
+//     let lineup = "";
+//     lineupBtn.textContent = `0/${links.length}`
+//     lineupBtn.disabled = "true";
+
+//     let done = 0
+//     for (let link of links) {
+//         try {
+//             const response = await fetch(link);
+//             const html = await response.text();
+//             const parser = new DOMParser();
+//             const doc = parser.parseFromString(html, "text/html");
+
+//             const titleElement = doc.querySelector(".post-title.entry-title");
+//             const contentElement = doc.querySelector(".entry-content.gridread-clearfix");
+
+//             if (titleElement && contentElement) {
+//                 const title = titleElement.textContent.trim();
+//                 let content = contentElement.innerHTML.trim();
+
+                
+//                 content = content.replace(/<\/p>/g, '\n');  
+//                 content = content.replace(/<p>/g, ''); 
+//                 content = content.replace(/<br>/g, '');   
+
+//                 lineup += `${title}\n\n${content}\n<----->\n`;
+//                 lineupBtn.textContent = `${++done}/${links.length}`;
+//             } else {
+//                 console.warn(`Failed to extract lyrics for ${link}`);
+//             }
+//         } catch (err) {
+//             console.error("Failed to fetch lyrics page:", err);
+//         }
+//     }
+
+//     if (lineup.trim()) {
+//         const blob = new Blob([lineup], { type: "text/plain;charset=utf-8;" });
+//         const url = URL.createObjectURL(blob);
+
+//         const date = [new Date().getMonth() + 1, new Date().getDate(), new Date().getFullYear(), new Date().getHours(), new Date().getMinutes()].join('-');
+//         const filename = `Lineup-Grabber-${date}.txt`;
+
+//         const a = document.createElement("a");
+//         a.href = url;
+//         a.download = filename;
+//         document.body.appendChild(a);
+//         a.click();
+//         document.body.removeChild(a);
+//     } else alert("No lineup data available to download.");
+
+//     lineupBtn.innerHTML = `<i class="fa-regular fa-circle-down"></i> Line-Up (.txt)`;
+//     lineupBtn.disabled = false;
+// }
+
 async function downloadLineup() {
     const lineupBtn = document.getElementById("download-lineup-btn");
     const rows = [...document.querySelectorAll("#titles-table-body tr")];
-    const links = rows.map(row => row.children[1].children[0].dataset.id); 
+    const titles = rows.map(row => row.children[0].textContent.trim()); // Get titles
     let lineup = "";
-    lineupBtn.textContent = `0/${links.length}`
-    lineupBtn.disabled = "true";
+    
+    lineupBtn.textContent = `0/${titles.length}`;
+    lineupBtn.disabled = true;
 
-    let done = 0
-    for (let link of links) {
-        try {
-            const response = await fetch(link);
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
+    let done = 0;
+    for (let row of rows) {
+        const title = row.children[0].textContent.trim().toUpperCase(); // Title from the first column
+        const copyBtn = row.querySelector(".copy-btn"); // The button to copy lyrics
 
-            const titleElement = doc.querySelector(".post-title.entry-title");
-            const contentElement = doc.querySelector(".entry-content.gridread-clearfix");
+        let content = "";
 
-            if (titleElement && contentElement) {
-                const title = titleElement.textContent.trim();
-                let content = contentElement.innerHTML.trim();
+        if (copyBtn) {
+            const link = copyBtn.dataset.id; // The link is stored in the data-id attribute of the button
+            try {
+                const response = await fetch(link);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
 
-                
-                content = content.replace(/<\/p>/g, '\n');  
-                content = content.replace(/<p>/g, ''); 
-                content = content.replace(/<br>/g, '');   
+                const titleElement = doc.querySelector(".post-title.entry-title");
+                const contentElement = doc.querySelector(".entry-content.gridread-clearfix");
 
-                lineup += `${title}\n\n${content}\n<----->\n`;
-                lineupBtn.textContent = `${++done}/${links.length}`;
-            } else {
-                console.warn(`Failed to extract lyrics for ${link}`);
+                if (titleElement && contentElement) {
+                    let contentText = contentElement.innerHTML.trim();
+                    contentText = contentText.replace(/<\/p>/g, '\n');
+                    contentText = contentText.replace(/<p>/g, '');
+                    contentText = contentText.replace(/<br>/g, '');
+                    content = contentText;
+                } else {
+                    console.warn(`Failed to extract lyrics for ${link}`);
+                }
+            } catch (err) {
+                console.error("Failed to fetch lyrics page:", err);
             }
-        } catch (err) {
-            console.error("Failed to fetch lyrics page:", err);
         }
+
+        if (!content) {
+            content = ""; // If no button, just make content blank
+        }
+
+        lineup += `${title}\n\n${content}\n<----->\n`;
+        done++;
+        lineupBtn.textContent = `${done}/${titles.length}`;
     }
 
     if (lineup.trim()) {
@@ -222,11 +299,12 @@ async function downloadLineup() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-    } else alert("No lineup data available to download.");
+    } else {
+        alert("No lineup data available to download.");
+    }
 
-
-    lineupBtn.textContent = `Download Lineup`;
-    lineupBtn.disabled = "false";
+    lineupBtn.innerHTML = `<i class="fa-regular fa-circle-down"></i> Line-Up (.txt)`;
+    lineupBtn.disabled = false;
 }
 
 
