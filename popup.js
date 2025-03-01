@@ -242,7 +242,7 @@ async function downloadLineup() {
     const titles = rows.map(row => row.children[0].textContent.trim()); // Get titles
     let lineup = "";
     
-    lineupBtn.textContent = `0/${titles.length}`;
+    lineupBtn.innerHTML = `<i class="fa-regular fa-circle-down"></i> 0/${titles.length}`;
     lineupBtn.disabled = true;
 
     let done = 0;
@@ -283,7 +283,7 @@ async function downloadLineup() {
 
         lineup += `${title}\n\n${content}\n<----->\n`;
         done++;
-        lineupBtn.textContent = `${done}/${titles.length}`;
+        lineupBtn.innerHTML = `<i class="fa-regular fa-circle-down"></i> ${done}/${titles.length}`;
     }
 
     if (lineup.trim()) {
@@ -306,7 +306,6 @@ async function downloadLineup() {
     lineupBtn.innerHTML = `<i class="fa-regular fa-circle-down"></i> Line-Up (.txt)`;
     lineupBtn.disabled = false;
 }
-
 
 function copyLyrics(url, button) {
     fetch(url)
