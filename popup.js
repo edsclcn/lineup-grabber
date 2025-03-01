@@ -290,8 +290,8 @@ async function downloadLineup() {
         const blob = new Blob([lineup], { type: "text/plain;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
 
-        const date = [new Date().getMonth() + 1, new Date().getDate(), new Date().getFullYear(), new Date().getHours(), new Date().getMinutes()].join('-');
-        const filename = `Lineup-Grabber-${date}.txt`;
+        const date = getFormattedDateForFilename();
+        const filename = `${date}_${activeButtonLabel}_line_up.txt`;
 
         const a = document.createElement("a");
         a.href = url;
